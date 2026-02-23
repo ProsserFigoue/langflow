@@ -2,7 +2,7 @@ services:
   langflow:
     image: 'langflowai/langflow:latest'
     pull_policy: always
-    user: root  # FORCE LES DROITS D'ÉCRITURE SUR LE VOLUME
+    user: root  # Indispensable pour tes permissions actuelles
     ports:
       - '7860:7860'
     depends_on:
@@ -13,8 +13,12 @@ services:
       - LANGFLOW_CONFIG_DIR=/app/langflow
       - LANGFLOW_HOST=0.0.0.0
       - LANGFLOW_PORT=7860
+      # --- AJOUTS SÉCURITÉ NEXUS ---
+      - LANGFLOW_AUTO_LOGIN=false
+      - LANGFLOW_SUPERUSER=${LANGFLOW_SUPERUSER}
+      - LANGFLOW_SUPERUSER_PASSWORD=${LANGFLOW_SUPERUSER_PASSWORD}
     labels:
-      - "coolify.proxy.port=7860" # INDISPENSABLE POUR COOLIFY
+      - "coolify.proxy.port=7860"
     volumes:
       - 'langflow-data:/app/langflow'
     restart: unless-stopped
