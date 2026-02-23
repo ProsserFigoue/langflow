@@ -2,15 +2,22 @@ services:
   langflow:
     image: 'langflowai/langflow:latest'
     pull_policy: always
+    user: root  # FORCE LES DROITS D'ÉCRITURE SUR LE VOLUME
     ports:
       - '7860:7860'
     depends_on:
-      - postgres
+      postgres:
+        condition: service_healthy
     environment:
       - 'LANGFLOW_DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}'
       - LANGFLOW_CONFIG_DIR=/app/langflow
+      - LANGFLOW_HOST=0.0.0.0
+      - LANGFLOW_PORT=7860
+    labels:
+      - "coolify.proxy.port=7860" # INDISPENSABLE POUR COOLIFY
     volumes:
       - 'langflow-data:/app/langflow'
+    restart: unless-stopped
 
   postgres:
     image: 'postgres:16'
@@ -22,6 +29,12 @@ services:
       - '5432:5432'
     volumes:
       - 'langflow-postgres:/var/lib/postgresql/data'
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
 volumes:
   langflow-postgres:
