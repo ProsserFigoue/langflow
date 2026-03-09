@@ -17,12 +17,14 @@ services:
       - LANGFLOW_AUTO_LOGIN=false
       - LANGFLOW_SUPERUSER=${LANGFLOW_SUPERUSER}
       - LANGFLOW_SUPERUSER_PASSWORD=${LANGFLOW_SUPERUSER_PASSWORD}
+      # --- CHROMA PERSISTANCE ---
+      - LANGFLOW_CHROMA_PERSIST_DIRECTORY=/app/chroma_db
     labels:
       - "coolify.proxy.port=7860"
     volumes:
       - 'langflow-data:/app/langflow'
+      - 'langflow-chroma:/app/chroma_db'
     restart: unless-stopped
-
   postgres:
     image: 'postgres:16'
     environment:
@@ -39,7 +41,7 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
 volumes:
   langflow-postgres:
   langflow-data:
+  langflow-chroma:
